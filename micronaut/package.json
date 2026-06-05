@@ -1,0 +1,37 @@
+{
+  "name": "micronaut-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node node-services/runtime/json_runtime_server.mjs",
+    "smoke": "node node-services/runtime/test_json_runtime_smoke.mjs",
+    "lint": "eslint \"**/*.mjs\" --ignore-pattern \"node_modules/**\"",
+    "test:native": "node ../verify-sk-fleet-integration.mjs",
+    "test:cpp": "cmd /c \"cd ../native/semantic_kernel_cpp/build && Release\\unit_tests.exe\"",
+    "test:python": "python python/tests/connector_tests.py",
+    "test": "npm run smoke && npm run test:native && npm run test:cpp && npm run test:python",
+    "build-native": "cmd /c \"call ..\\micronaut-factory\\build.bat\"",
+    "micronaut:generate": "node tools\\generate_micronaut_bson.mjs micronauts\\sample_micronaut.json micronauts\\micronaut.bson",
+    "kuhul:mkbootstrap": "node Micronaut_V1\\kuhul-mkbootstrap.mjs --input Micronaut_V1\\br-1.json --output micronauts\\br-1.micronaut.bson",
+    "kuhul:verify": "node Micronaut_V1\\kuhul-verify.mjs micronauts\\br-1.micronaut.bson",
+    "kuhul:ctl:swap": "node Micronaut_V1\\kuhul-ctl.mjs swap micronauts\\br-1.micronaut.bson"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.1.0",
+    "ajv": "^8.12.0",
+    "axios": "^1.15.1",
+    "better-sqlite3": "^12.9.0",
+    "blessed": "^0.1.81",
+    "body-parser": "^1.20.2",
+    "bson": "^1.1.6",
+    "cors": "^2.8.5",
+    "express": "^4.22.1",
+    "node-fetch": "^3.3.2",
+    "spdy": "^4.0.2",
+    "uuid": "^14.0.0"
+  }
+}
