@@ -49,36 +49,41 @@
 
 ---
 
-## Phase 2: Native C++ Inference Engine (2-3 days)
+## Phase 2: Semantic Kernel Integration (1 day)
 
-### 2.1 Set up micronaut-coder C++ project
-- [ ] Scaffold CMakeLists.txt for micronaut-coder/
-  - Link to native/scx_runtime/src/ (compilers, shaders)
-  - Link to native/shaders/gpt2/ (13 HLSL shaders)
-  - Add GGUF loader dependency
-- [ ] Create main inference loop: `micronaut-coder/src/main.cpp`
-  - Load GGUF model (`models/gguf/gpt2_coder.Q8_0.gguf`)
-  - HTTP endpoint on port 25500 (configurable)
-  - Routes: `POST /chat`, `GET /health`, `POST /tokens`
+### 2.1 Python HTTP Wrapper (inference_wrapper.py)
+- [x] **CREATED** `micronaut-coder/src/inference_wrapper.py`
+  - Wraps `scx_runtime.exe` (semantic kernel) as HTTP server
+  - Endpoints: `POST /chat`, `GET /health`, `POST /tokens`
+  - Runs scx_runtime subprocess with prompt + domain
+  - Parses JSON output (text, tokens, glyph_phases)
+  - Listen on port 25500
 
-### 2.2 Implement token signal generator
-- [ ] Create `micronaut-coder/src/token_signal_generator.cpp`
-  - Maps tokens → glyph opcodes (⟁COMPUTE_FOLD⟁ + domain)
-  - Calls glyph_dispatcher for domain-specific routing
-  - Returns combined response (text + glyph result)
-- [ ] Wire into main inference loop
+### 2.2 Token Signal Generator (token_signal_generator.py)
+- [x] **CREATED** `micronaut-coder/src/token_signal_generator.py`
+  - Custom mapping: code tokens → glyph phases
+  - Patterns for 6 canonical phases:
+    - `Pop` (output): function/class definitions
+    - `Wo` (write): assignments, I/O
+    - `Yax` (conditional): if/else, loops, try/except
+    - `Sek` (semantic): imports, type hints
+    - `Ch'en` (read): function calls, attribute access
+    - `Xul` (terminate): return, break, raise
+  - Domain-aware routing (D0-D5)
+  - Tested: matrix_multiply code → `Sek -> Pop -> Wo -> Yax -> Xul`
 
-### 2.3 Implement GPU acceleration
-- [ ] Use existing HLSL shaders (gpt2_matmul.hlsl, gpt2_attn_fwd.hlsl, etc.)
-- [ ] D3D12 compute shader dispatch for forward pass
-- [ ] Quantized matmul (INT8 weights via gpt2_qkv_split.hlsl)
-- [ ] Fallback to CPU Adam if GPU unavailable
+### 2.3 Integrate Semantic Kernel
+- [ ] **SEMANTIC KERNEL AVAILABLE**: `E:\data\smgm16_gpu_bridge\versions\cpu_thread_cluster_v1\native\scx_runtime\build-local\Release\scx_runtime.exe`
+- [ ] **COMPILED SHADERS**: `E:\data\smgm16_gpu_bridge\versions\cpu_thread_cluster_v1\native\xvm-d3d12\compiled_shaders/` (20+ .cso files)
+- [ ] Update inference_wrapper.py to call scx_runtime with:
+  - `--prompt "<code prompt>"`
+  - `--domain "D1|D2|D4|..."`
+  - Expect JSON: `{"text": "...", "tokens": [...], "glyph_phases": [...]}`
 
-### 2.4 Build & test
-- [ ] `cmake .. -G "Visual Studio 17 2022" -A x64`
-- [ ] `cmake --build . --config Release`
-- [ ] Smoke test: `.\Release\mm-coder.exe --test-inference "def hello()"`
-- [ ] HTTP test: `curl -X POST http://127.0.0.1:25500/chat -d '{"prompt": "write python code"}'`
+### 2.4 Test integration
+- [ ] Start inference server: `python inference_wrapper.py --port 25500`
+- [ ] HTTP test: `curl -X POST http://127.0.0.1:25500/chat -d '{"prompt": "def factorial(n): ...", "domain": "D1"}'`
+- [ ] Verify glyph phase sequence from output
 
 ---
 
