@@ -343,4 +343,4 @@ if __name__ == "__main__":
     print(f"  Flair applied: {result['flair_applied']}")
     print(f"  Tool used: {result['tool_used']}")
 
-    print("\n✓ Pipeline tests complete")
+    print("\n[OK] Pipeline tests complete")
