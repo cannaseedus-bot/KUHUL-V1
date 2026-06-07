@@ -8,13 +8,28 @@
 
 ## Phase 1: Prepare & Fine-Tune (2-3 days)
 
-### 1.1 Collect coding corpus
-- [ ] Gather Python/JS/C++ code samples for training
-  - Source: releases/Kuhul-PY/, micronaut-coder/sample_src/, public repos
-  - Target: 5000-10000 code examples with semantic tags
-  - Format: JSONL with `{"prompt": "...", "response": "...", "curriculum_bucket": "..."}`
+### 1.1 Prepare coding corpus
+- [ ] **CODER DATA** (already available):
+  - Train: `E:\data\smgm16_gpu_bridge\coder_outputs.train.jsonl` (1.8 GB, 158K records)
+  - Val: `E:\data\smgm16_gpu_bridge\coder_outputs.val.jsonl` (207 MB, 17K records)
+  - Format: `{"chat_format", "domain", "messages": [{"role", "content"}], "output", ...}`
+  - Has conversation history + code domain labels
+  
+- [ ] **MAP NUMATIC DATA** to KXML domains:
+  - Source files: `E:\data\combined_train2.jsonl.numatic`, `foundation_merged.jsonl.numatic`, etc. (9 files, 3.4 GB)
+  - Format: `{"input", "output", "@numatics": {"semantic_fold", "kuhul_phases", "habitat", ...}}`
+  - Already annotated with glyph phases (Pop, Wo, Yax, Sek, Ch'en, Xul)
+  - Map `@numatics.semantic_fold` → KXML domain (D0-D5)
+  - Extract `kuhul_phases` for token signal generator routing
+  
+- [ ] **CREATE TRAINING CURRICULUM**:
+  - Reformat coder data: `{"prompt": "...", "response": "...", "curriculum_bucket": "easy|medium|hard", "domain": "D1|D2|D4"}`
+  - Bucket by: message count (easy=1-2 turns, medium=3-5, hard=5+)
+  - Output: `models/smgm-16/scxq2_dds_folds/coder_curriculum.jsonl`
+  
 - [ ] Tokenize via `micronaut/training/tokenize_dataset.py`
-- [ ] Output: `models/smgm-16/scxq2_dds_folds/coder_tokens.bin`
+  - Input: coder_curriculum.jsonl
+  - Output: `models/smgm-16/scxq2_dds_folds/coder_tokens.bin`
 
 ### 1.2 Fine-tune GPT-2 on coding data
 - [ ] Run `micronaut/training/train_loop.py` with coder curriculum
@@ -157,12 +172,28 @@
 
 ---
 
+## Data Sources Confirmed
+
+✅ **Coder Training Data:**
+- `E:\data\smgm16_gpu_bridge\coder_outputs.train.jsonl` (1.8 GB, 158K records)
+- `E:\data\smgm16_gpu_bridge\coder_outputs.val.jsonl` (207 MB, 17K records)
+- Format: conversation history + code domain labels
+- Ready to use immediately
+
+✅ **Numatic Semantic Data:**
+- 9 files, 3.4 GB total
+- Already has glyph phase annotations (@numatics.kuhul_phases)
+- Maps to KXML domain routing
+- Can inform token signal generator
+
 ## Questions for User
 
-1. **Coding corpus:** Do you have code samples ready, or should I gather from releases/?
-2. **C++ chunks:** Do you have existing MM-CODER inference code (GGUF loader, HTTP server)?
-3. **Token signal generator:** What glyph opcodes should code execution produce? (e.g., SKILL_PYTHON, GPU_MATMUL, etc.)
-4. **Timeline:** 2-3 day sprint, or break into smaller chunks?
+1. **C++ inference boilerplate:** Do you have existing GGUF loader + HTTP server code?
+2. **Token signal generator logic:** 
+   - Given a coder prompt, which glyph phases should execute? (SKILL_PYTHON, GPU_MATMUL, etc.)
+   - Use @numatics.kuhul_phases from numatic data?
+3. **Domain mapping:** Should numatic data's semantic_fold map 1:1 to KXML domains (D0-D5)?
+4. **Timeline:** Start Phase 1.1 immediately with coder data?
 
 ---
 
