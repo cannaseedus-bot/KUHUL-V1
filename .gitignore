@@ -1,0 +1,66 @@
+# ASX-RUNTIME v0.7 Build Artifacts
+native/**/build/
+native/**/bin/
+native/**/obj/
+native/**/Release/
+native/**/Debug/
+**/*.exe
+**/*.dll
+**/*.pdb
+**/*.lib
+**/*.obj
+**/*.exp
+**/*.ilk
+
+# Node Dependencies
+node_modules/
+npm-debug.log*
+
+# Python Environment & Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# ASX-RUNTIME Specific
+logs/*.log
+logs/*.err
+replay_lanes/*.replay
+shard_manifest.json
+KuhulGeometricState
+
+# IDE / OS
+.vs/
+.vscode/
+*.swp
+*.swo
+Thumbs.db
+Desktop.ini
+
+# Windows reserved device names (cause git indexing errors)
+nul
+
+# Large training datasets (keep compressed .7z only, exclude raw .jsonl)
+*.train.jsonl
+*.val.jsonl
+llm/training/*.jsonl
+
+# CMake & build artifacts (machine-specific, generated)
+**/CMakeFiles/
+**/CMakeCache.txt
+**/CMakeLists.txt.user
+**/build-cmake-targets-**/
+**/*.tlog
+**/*.vcxproj
+**/*.vcxproj.filters
+**/*.exe.recipe
+**/*.lastbuildstate
+**/Debug/
+**/Release/
+**/*.bin
+**/*.o
+**/*.a
